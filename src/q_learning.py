@@ -21,10 +21,9 @@ goal = World.goal   #   (World.specials[1][0], World.specials[1][1])
 pit = World.pit #   [(World.specials[0][0], World.specials[0][1])]
 
 Q = {}
-discount = World.discount
 alpha = 1
 score = 1
-move_reward = -1
+move_reward = -0.1
 goal_reward = 1
 pit_reward = -1
 move_pass = 0.8
@@ -51,14 +50,14 @@ def init():
             elif state in pit:
                 temp[action] = pit_reward
             else:
-                temp[action] = 0.1
+                temp[action] = 0
         Q[state] = temp
 
 def move(action):
     global current, score
     s = current
     (curr_x, curr_y) = current
-
+    r = 0
     if action == actions[1]:
         current = (curr_x-1 if curr_x-1 >= 0 else curr_x, curr_y)
     elif action == actions[3]:
@@ -71,30 +70,80 @@ def move(action):
     if current in walls:
         current = s
     elif current == goal:
+        r = goal_reward
         World.restart = True
     elif current in pit:
+        r = pit_reward
         World.restart = True
 
     World.move_bot(current[0], current[1])
-    r = move_reward
 
-    score += r
     s2 = current
     return s, action, r, s2
 
+def agent(s,Q):
+   a = ['up','left','down','right']
+   if Q[s][a[0]] == 0 and Q[s][a[1]] == 0 and Q[s][a[2]] == 0 and Q[s][a[3]] == 0:
+       action = np.random.randint(0,4)
+       return action
+   else:
+       max2 = 0
+       for i in range(4):
+           if Q[s][a[i]] > max2:
+               max2 = Q[s][a[i]]
+               action = i
+       return action
+
+def Q_Learning(path,count):    
+    path = np.array(path)
+   # print("Path: ",path)
+    for i in range(path.shape[0]):
+        if i+1 < path.shape[0]:
+            state = path[i][0]
+            action = path[i][1]
+            nextState = path[i+1][0]
+            nextAction = path[i+1][1]
+            alpha = 1/count
+            discountRate = 0.9
+            # print(path)
+            
+            Q[state][actions[action]] = Q[state][actions[action]] + (alpha* ( (discountRate *Q[nextState][actions[nextAction]]) - Q[state][actions[action]] ))
+    print("Q",count," ",Q)
+
+
 def main():
-    global alpha, discount, current, score, epsilon, episodes
+    global alpha, discount, current, score, epsilon, episodes,grid
     iter = 1
     init()
-
+    path = []
+    count = 0
+   
+ 
+   # print(Q)
     while iter != episodes:
         if World.flag is None:
             quit()
         if World.flag is True:
             continue
+        
+        myaction = agent(current,Q)
+        path.append([current,myaction])
+        (s, a, reward, s2) = move(actions[myaction])
+        if reward == 1:
+            count += 1
+            if count == 1:
+                Q[current][actions[myaction]] = 1
+                print("Q1: ",Q)
+                print("---------------------------------------------")
+                path = []
+            else:
+                path.append([current,myaction])
+                Q_Learning(path,count)
+                path = []
+        elif reward == -1:
+            Q[current][actions[myaction]] = -1
+            path = []
 
-        (s, a, reward, s2) = move(actions[2])
-        print(reward)
 
         iter += 1
 
@@ -107,7 +156,6 @@ def main():
             score = 1
 
         time.sleep((World.w1.get() + 0.1)/ 100)
-        discount = World.discount
 
 
 t = threading.Thread(target=main)

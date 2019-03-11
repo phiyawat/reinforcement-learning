@@ -216,15 +216,6 @@ e = Entry(qframe, width=5)
 e.pack(side=LEFT)
 e.insert(0, "0.8")
 
-discount = 0.9
-def getDiscount(event):
-    global discount
-    discount = float(e.get())
-    print(discount)
-b3 = Button(qframe, text="Discount")
-b3.bind("<Button-1>", getDiscount)
-b3.pack(side=LEFT)
-
 def begin():
     global flag
     master.mainloop()
