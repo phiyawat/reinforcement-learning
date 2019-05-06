@@ -1,5 +1,5 @@
 import time
-from tkinter import Tk,Entry,Label,X,Canvas,Frame,Scale,Button,StringVar,OptionMenu,SUNKEN,HORIZONTAL,LEFT,BOTTOM,RIGHT,messagebox,simpledialog,filedialog
+from tkinter import Tk,Entry,Label,X,Canvas,Frame,Scale,Button,StringVar,OptionMenu,SUNKEN,HORIZONTAL,LEFT,BOTTOM,RIGHT,TOP,messagebox,simpledialog,filedialog
 from PIL import Image,ImageTk
 import numpy as np
 import os
@@ -215,6 +215,36 @@ qframe.pack()
 e = Entry(qframe, width=5)
 e.pack(side=LEFT)
 e.insert(0, "0.8")
+
+discount = 0.8
+def getDiscount(event):
+    global discount
+    discount = float(e.get())
+    print("Q Learning Parameters : ",discount)
+b3 = Button(qframe, text="Discount")
+b3.bind("<Button-1>", getDiscount)
+b3.pack(side=LEFT)
+
+q4frame = Frame(master)
+q4frame.pack()
+
+def create_pit(event):
+    x = int(e2.get())
+    y = int(e3.get())
+    item_grid[x][y] = board.create_image(y*Width+35, x*Width+35, image=ice_pic)
+    grid[x][y] = 4
+    pit.append((y, x))
+
+e2 = Entry(q4frame, width=5)
+e2.pack(side=LEFT)
+e3 = Entry(q4frame, width=5)
+e3.pack(side=LEFT)
+b4 = Button(q4frame, text="add pit")
+b4.bind("<Button-1>", create_pit)
+b4.pack(pady=10)
+
+def getNow():
+    return discount
 
 def begin():
     global flag

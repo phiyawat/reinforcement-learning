@@ -10,6 +10,7 @@ import random
 #         [0, 0, 0, 0],
 #         [0, 0, 0, 0]]
 grid = World.grid
+print(grid)
 actions = World.actions #   ["up", "left", "down", "right"]
 policy_sign = ["^", "<", "v", ">"]
 states = []
@@ -30,7 +31,7 @@ move_pass = 0.8
 move_fail = 0.1
 move_action = [-1, 0, 1]
 epsilon = 0.1
-episodes = 10000
+episodes = 100000
 steps = 300
 
 
@@ -92,9 +93,14 @@ def agent(s,Q):
            if Q[s][a[i]] > max2:
                max2 = Q[s][a[i]]
                action = i
+       if max2 == 0:
+           while(True):
+               action = np.random.randint(0,4)
+               if Q[s][a[action]] >= 0:
+                   break
        return action
 
-def Q_Learning(path,count):    
+def Q_Learning(path,count,reward):    
     path = np.array(path)
    # print("Path: ",path)
     for i in range(path.shape[0]):
@@ -104,12 +110,13 @@ def Q_Learning(path,count):
             nextState = path[i+1][0]
             nextAction = path[i+1][1]
             alpha = 1/count
-            discountRate = 0.9
+            discountRate = World.getNow()
             # print(path)
             
-            Q[state][actions[action]] = Q[state][actions[action]] + (alpha* ( (discountRate *Q[nextState][actions[nextAction]]) - Q[state][actions[action]] ))
+            Q[state][actions[action]] = Q[state][actions[action]] + (alpha* reward * ( (discountRate *Q[nextState][actions[nextAction]]) - Q[state][actions[action]] ))
+    print("*************************"+"Round: "+str(count)+"***************************************")
     print("Q",count," ",Q)
-
+    print("********************************************************************************")
 
 def main():
     global alpha, discount, current, score, epsilon, episodes,grid
@@ -117,6 +124,7 @@ def main():
     init()
     path = []
     count = 0
+    count2 = 0
    
  
    # print(Q)
@@ -131,17 +139,15 @@ def main():
         (s, a, reward, s2) = move(actions[myaction])
         if reward == 1:
             count += 1
-            if count == 1:
-                Q[current][actions[myaction]] = 1
-                print("Q1: ",Q)
-                print("---------------------------------------------")
-                path = []
-            else:
-                path.append([current,myaction])
-                Q_Learning(path,count)
-                path = []
+            path.append([current,myaction])
+            Q_Learning(path,count,reward)
+            path = []
         elif reward == -1:
-            Q[current][actions[myaction]] = -1
+            count2 += 1
+            # print('punished!!',count2)
+            # print(Q)
+            Q_Learning(path,count2,-1)
+            #Q[current][actions[myaction]] = -1
             path = []
 
 
