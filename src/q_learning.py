@@ -96,7 +96,8 @@ def agent(s,Q):
        if max2 == 0:
            while(True):
                action = np.random.randint(0,4)
-               if Q[s][a[action]] >= 0:
+               if Q[s][a[action]] == 0:
+                   print('take action: ',action)
                    break
        return action
 
@@ -113,7 +114,9 @@ def Q_Learning(path,count,reward):
             discountRate = World.getNow()
             # print(path)
             
-            Q[state][actions[action]] = Q[state][actions[action]] + (alpha* reward * ( (discountRate *Q[nextState][actions[nextAction]]) - Q[state][actions[action]] ))
+            Q[state][actions[action]] = Q[state][actions[action]] + alpha * (reward + (discountRate *Q[nextState][actions[nextAction]]) - Q[state][actions[action]] )
+            if Q[state][actions[action]] < 0:
+                Q[state][actions[action]] = 0
     print("*************************"+"Round: "+str(count)+"***************************************")
     print("Q",count," ",Q)
     print("********************************************************************************")
@@ -140,13 +143,14 @@ def main():
         if reward == 1:
             count += 1
             path.append([current,myaction])
-            Q_Learning(path,count,reward)
+            if count >= 2:
+                Q_Learning(path,count,0)
             path = []
         elif reward == -1:
             count2 += 1
-            # print('punished!!',count2)
             # print(Q)
-            Q_Learning(path,count2,-1)
+            if count2 >= 2:
+                Q_Learning(path,count2,-1)
             #Q[current][actions[myaction]] = -1
             path = []
 
