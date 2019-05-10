@@ -93,12 +93,6 @@ def agent(s,Q):
            if Q[s][a[i]] > max2:
                max2 = Q[s][a[i]]
                action = i
-       if max2 == 0:
-           while(True):
-               action = np.random.randint(0,4)
-               if Q[s][a[action]] == 0:
-                   print('take action: ',action)
-                   break
        return action
 
 def Q_Learning(path,count,reward):    
@@ -148,9 +142,9 @@ def main():
             path = []
         elif reward == -1:
             count2 += 1
-            # print(Q)
-            if count2 >= 2:
-                Q_Learning(path,count2,-1)
+            # print("agent punished!! ",path)
+            path.append([current,myaction])
+            Q_Learning(path,count2,-1)
             #Q[current][actions[myaction]] = -1
             path = []
 
