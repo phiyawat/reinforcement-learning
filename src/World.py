@@ -220,6 +220,8 @@ discount = 0.8
 def getDiscount(event):
     global discount
     discount = float(e.get())
+    if discount > 1:
+        discount = 1
     print("Q Learning Parameters : ",discount)
 b3 = Button(qframe, text="Discount")
 b3.bind("<Button-1>", getDiscount)
